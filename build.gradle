@@ -1,0 +1,86 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+
+group = 'org.apache.rocketmq'
+version = '1.0.1-RELEASE'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+buildscript {
+    repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/repositories/central' }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
+    }
+}
+
+uploadArchives {
+    configuration = configurations.archives
+    repositories {
+        mavenDeployer {
+            repository(url:'http://repo.orzass.com/nexus/content/repositories/releases') {
+                authentication(userName: "xnh", password: "xnh123")
+            }
+            pom.project {
+                groupId project.group
+                artifactId project.name
+                version project.version
+            }
+        }
+    }
+}
+
+
+repositories {
+
+    maven { url 'http://maven.aliyun.com/nexus/content/repositories/central' }
+    maven { url 'http://repo.orzass.com/nexus/content/repositories/releases' }
+}
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter') {
+        exclude(module: 'commons-logging')
+    }
+    compile(group: 'org.apache.rocketmq', name: 'rocketmq-client', version:'4.2.0') {
+        exclude(module: 'slf4j-api')
+    }
+    compile 'org.springframework:spring-messaging'
+    compile 'com.fasterxml.jackson.core:jackson-databind'
+    compile 'org.springframework.boot:spring-boot-configuration-processor'
+    testCompile('org.springframework.boot:spring-boot-starter-test') {
+        exclude(module: 'commons-logging')
+    }
+    compile ("cn.luban:luban-commons:1.0.5")
+    compileOnly 'org.projectlombok:lombok'
+}
+
+jar {
+    enabled = true
+}
+
+bootJar {
+    enabled = false
+}
+
+task sourceJar (type : Jar) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
+task javadocJar (type: Jar, dependsOn: javadoc) {
+    classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourceJar
+}
