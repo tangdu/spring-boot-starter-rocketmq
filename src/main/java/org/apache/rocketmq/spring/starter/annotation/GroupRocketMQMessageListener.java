@@ -15,17 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.rocketmq.spring.starter.core;
+package org.apache.rocketmq.spring.starter.annotation;
 
-import org.springframework.beans.factory.DisposableBean;
+import cn.luban.commons.message.MessageType;
+import cn.luban.commons.message.Topic;
+import org.apache.rocketmq.common.filter.ExpressionType;
 
-import java.util.Map;
+import java.lang.annotation.*;
 
-public interface RocketMQListenerContainer extends DisposableBean {
+/**
+ * Topic组配置
+ *
+ * @author tangdu
+ * @version $: GroupRocketMQ.java, v 0.1 2018年03月30日 上午11:24 tangdu Exp $
+ */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface GroupRocketMQMessageListener {
 
     /**
-     * Setup the message listener to use. Throws an {@link IllegalArgumentException} if that message listener type is
-     * not supported.
+     * Topic name
      */
-    void setupMessageListeners(Map<String,RocketMQListener>  messageListeners);
+    Topic topic();
+
+    /**
+     * Control which message can be select. Grammar please see {@link ExpressionType#TAG} and {@link ExpressionType#SQL92}
+     */
+    MessageType messageType();
+
 }

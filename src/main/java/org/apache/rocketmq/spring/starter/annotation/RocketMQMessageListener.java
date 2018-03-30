@@ -17,6 +17,8 @@
 
 package org.apache.rocketmq.spring.starter.annotation;
 
+import cn.luban.commons.message.MessageType;
+import cn.luban.commons.message.Topic;
 import org.apache.rocketmq.common.filter.ExpressionType;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.apache.rocketmq.spring.starter.enums.ConsumeMode;
@@ -41,7 +43,7 @@ public @interface RocketMQMessageListener {
     /**
      * Topic name
      */
-    String topic();
+    Topic topic();
 
     /**
      * Control how to selector message
@@ -53,7 +55,7 @@ public @interface RocketMQMessageListener {
     /**
      * Control which message can be select. Grammar please see {@link ExpressionType#TAG} and {@link ExpressionType#SQL92}
      */
-    String selectorExpress() default "*";
+    MessageType messageType() ;
 
     /**
      * Control consume mode, you can choice receive message concurrently or orderly

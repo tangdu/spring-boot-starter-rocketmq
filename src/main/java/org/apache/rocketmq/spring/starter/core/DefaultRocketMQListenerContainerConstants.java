@@ -29,7 +29,7 @@ public final class DefaultRocketMQListenerContainerConstants {
     public static final String PROP_MESSAGE_MODEL = "messageModel";
     public static final String PROP_SELECTOR_EXPRESS = "selectorExpress";
     public static final String PROP_SELECTOR_TYPE = "selectorType";
-    public static final String PROP_ROCKETMQ_LISTENER = "rocketMQListener";
+    public static final String PROP_ROCKETMQ_LISTENER = "rocketMQListeners";
     public static final String PROP_OBJECT_MAPPER = "objectMapper";
     public static final String METHOD_DESTROY = "destroy";
 }
