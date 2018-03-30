@@ -265,7 +265,7 @@ public class RocketMQAutoConfiguration {
             BeanDefinitionBuilder beanBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultRocketMQListenerContainer.class);
             beanBuilder.addPropertyValue(PROP_NAMESERVER, rocketMQProperties.getNameServer());
             beanBuilder.addPropertyValue(PROP_TOPIC, environment.resolvePlaceholders(annotation.topic().name()));
-            beanBuilder.addPropertyValue(PROP_CONSUMER_GROUP, Joiner.on("_").join(LubanConfig.getApplicationName(),topicName));
+            beanBuilder.addPropertyValue(PROP_CONSUMER_GROUP, Joiner.on("_").join(LubanConfig.getApplicationName(),topicName).toUpperCase());
             //TODO 默认只支持集群消费+无顺序
             beanBuilder.addPropertyValue(PROP_CONSUME_MODE, ConsumeMode.CONCURRENTLY);
             beanBuilder.addPropertyValue(PROP_CONSUME_THREAD_MAX, 64);
