@@ -17,6 +17,9 @@
 
 package org.apache.rocketmq.spring.starter.core;
 
+import cn.luban.commons.message.BaseMessage;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import lombok.Getter;
@@ -145,16 +148,15 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
         @Override
         public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
             for (MessageExt messageExt : msgs) {
-                log.debug("received msg: {}", messageExt);
+                long now = System.currentTimeMillis();
                 try {
-                    long now = System.currentTimeMillis();
                     rocketMQListeners.get(messageExt.getTags()).onMessage(doConvertMessage(messageExt));
-                    long costTime = System.currentTimeMillis() - now;
-                    log.debug("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
                 } catch (Exception e) {
                     log.warn("consume message failed. messageExt:{}", messageExt, e);
                     context.setDelayLevelWhenNextConsume(delayLevelWhenNextConsume);
                     return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+                } finally {
+                    log.debug("consume:{},messageExt:{} cost:{} ms", messageExt.getMsgId(),messageExt,  System.currentTimeMillis() - now);
                 }
             }
 
@@ -168,16 +170,15 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
         @Override
         public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
             for (MessageExt messageExt : msgs) {
-                log.debug("received msg: {}", messageExt);
+                long now = System.currentTimeMillis();
                 try {
-                    long now = System.currentTimeMillis();
                     rocketMQListeners.get(messageExt.getTags()).onMessage(doConvertMessage(messageExt));
-                    long costTime = System.currentTimeMillis() - now;
-                    log.info("consume {} cost: {} ms", messageExt.getMsgId(), costTime);
                 } catch (Exception e) {
-                    log.warn("consume message failed. messageExt:{}", messageExt, e);
+                    log.warn("consume message failed. message:{}", messageExt, e);
                     context.setSuspendCurrentQueueTimeMillis(suspendCurrentQueueTimeMillis);
                     return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
+                } finally {
+                    log.debug("consume:{},messageExt:{} cost:{} ms", messageExt.getMsgId(),messageExt,  System.currentTimeMillis() - now);
                 }
             }
 
@@ -215,7 +216,14 @@ public class DefaultRocketMQListenerContainer implements InitializingBean, Rocke
             } else {
                 // if msgType not string, use objectMapper change it.
                 try {
-                    return objectMapper.readValue(str, messageType);
+                    //对于实现BaseMessage接口数据特殊处理,默认取第一个实现接口
+                    if(messageType.getInterfaces().length>0 && Objects.equals(messageType.getInterfaces()[0], BaseMessage.class)){
+                        JSONObject jsonObject=JSONObject.parseObject(str);
+                        jsonObject.put("messageId",messageExt.getMsgId());
+                        return JSON.parseObject(jsonObject.toJSONString(),messageType);
+                    }else {
+                        return objectMapper.readValue(str, messageType);
+                    }
                 } catch (Exception e) {
                     log.info("convert failed. str:{}, msgType:{}", str, messageType);
                     throw new RuntimeException("cannot convert message to " + messageType, e);
