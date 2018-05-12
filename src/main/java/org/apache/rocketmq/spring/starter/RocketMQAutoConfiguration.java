@@ -38,8 +38,6 @@ import org.apache.rocketmq.spring.starter.enums.SelectorType;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -91,16 +89,17 @@ public class RocketMQAutoConfiguration {
         producer.setMaxMessageSize(producerConfig.getMaxMessageSize());
         producer.setCompressMsgBodyOverHowmuch(producerConfig.getCompressMsgBodyOverHowmuch());
         producer.setRetryAnotherBrokerWhenNotStoreOK(producerConfig.isRetryAnotherBrokerWhenNotStoreOk());
+        producer.setVipChannelEnabled(false);
 
         return producer;
     }
 
-    @Bean
-    @ConditionalOnClass(ObjectMapper.class)
-    @ConditionalOnMissingBean(name = "rocketMQMessageObjectMapper")
-    public ObjectMapper rocketMQMessageObjectMapper() {
-        return new ObjectMapper();
-    }
+//    @Bean("rocketMQMessageObjectMapper")
+////    @ConditionalOnClass(ObjectMapper.class)
+////    @ConditionalOnMissingBean(name = "rocketMQMessageObjectMapper")
+//    public ObjectMapper rocketMQMessageObjectMapper() {
+//        return new ObjectMapper();
+//    }
 
 //    @Bean(destroyMethod = "destroy")
 //    @ConditionalOnBean(DefaultMQProducer.class)
@@ -121,16 +120,11 @@ public class RocketMQAutoConfiguration {
     @Bean(destroyMethod = "destroy")
     @ConditionalOnBean(DefaultMQProducer.class)
     @ConditionalOnMissingBean(name = "rocketMQSender")
-    public RocketMQSender rocketMQTemplate(DefaultMQProducer mqProducer,
-            @Autowired(required = false)
-            @Qualifier("rocketMQMessageObjectMapper")
-            ObjectMapper objectMapper) {
+    public RocketMQSender rocketMQTemplate(DefaultMQProducer mqProducer) {
 
         RocketMQSender rocketMQTemplate = new RocketMQSender();
         rocketMQTemplate.setProducer(mqProducer);
-        if (Objects.nonNull(objectMapper)) {
-            rocketMQTemplate.setObjectMapper(objectMapper);
-        }
+        rocketMQTemplate.setObjectMapper(new ObjectMapper());
 
         return rocketMQTemplate;
     }
@@ -154,14 +148,9 @@ public class RocketMQAutoConfiguration {
         private ObjectMapper objectMapper;
 
         public ListenerContainerConfiguration() {
+            objectMapper=new ObjectMapper();
         }
 
-        @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-        @Autowired(required = false)
-        public ListenerContainerConfiguration(
-            @Qualifier("rocketMQMessageObjectMapper") ObjectMapper objectMapper) {
-            this.objectMapper = objectMapper;
-        }
 
         @Override
         public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
