@@ -161,12 +161,13 @@ public class RocketMQAutoConfiguration {
             RocketMQMessageListener annotation = clazz.getAnnotation(RocketMQMessageListener.class);
             BeanDefinitionBuilder beanBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultRocketMQListenerContainer.class);
             beanBuilder.addPropertyValue(PROP_NAMESERVER, rocketMQProperties.getNameServer());
-            beanBuilder.addPropertyValue(PROP_TOPIC, environment.resolvePlaceholders(annotation.topic()));
+            beanBuilder.addPropertyValue(PROP_TOPIC, environment.resolvePlaceholders(annotation.topic().name()));
             //由于consumerGroup不能重复
             String consumerGroup="";
-            if(!StringUtils.hasLength(annotation.consumerGroup()) && "*".equals(annotation.selectorExpress())){
+            if(!StringUtils.hasLength(annotation.consumerGroup())){
                 //1.如果cosumerGroup不设置,TAG包含所有，默认为系统名称+Topic名称
-                consumerGroup= Joiner.on("_").join(LubanConfig.getApplicationName().toUpperCase(),annotation.topic());
+                consumerGroup= Joiner.on("_").join(LubanConfig.getApplicationName().toUpperCase(),
+                        annotation.topic(),annotation.selectorExpress().getName());
             }else{
                 //2.取自定义
                 consumerGroup= environment.resolvePlaceholders(annotation.consumerGroup());
@@ -175,7 +176,7 @@ public class RocketMQAutoConfiguration {
             beanBuilder.addPropertyValue(PROP_CONSUME_MODE, annotation.consumeMode());
             beanBuilder.addPropertyValue(PROP_CONSUME_THREAD_MAX, annotation.consumeThreadMax());
             beanBuilder.addPropertyValue(PROP_MESSAGE_MODEL, annotation.messageModel());
-            beanBuilder.addPropertyValue(PROP_SELECTOR_EXPRESS, environment.resolvePlaceholders(annotation.selectorExpress()));
+            beanBuilder.addPropertyValue(PROP_SELECTOR_EXPRESS, environment.resolvePlaceholders(annotation.selectorExpress().getName()));
             beanBuilder.addPropertyValue(PROP_SELECTOR_TYPE, annotation.selectorType());
             beanBuilder.addPropertyValue(PROP_ROCKETMQ_LISTENER, rocketMQListener);
             if (Objects.nonNull(objectMapper)) {

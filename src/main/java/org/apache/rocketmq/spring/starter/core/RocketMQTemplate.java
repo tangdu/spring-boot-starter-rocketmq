@@ -17,11 +17,12 @@
 
 package org.apache.rocketmq.spring.starter.core;
 
+import cn.luban.commons.message.Destination;
+import cn.luban.commons.message.MessageType;
+import cn.luban.commons.message.Topic;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Objects;
+import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,10 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
+
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Objects;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 @Slf4j
@@ -79,6 +84,28 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
      */
     public SendResult syncSend(String destination, Message<?> message) {
         return syncSend(destination, message, producer.getSendMsgTimeout());
+    }
+
+    //增加默认方法
+    public SendResult sendMessage(Topic topic, MessageType messageType, Object payload) {
+        if (Objects.isNull(payload)||Objects.isNull(topic)||Objects.isNull(messageType) ) {
+            log.info("syncSend failed. topic:{},messageType:{}, message is null ", topic,messageType);
+            throw new IllegalArgumentException("`message` and `message.payload` cannot be null");
+        }
+
+        Destination destination=Destination.build(topic,Lists.newArrayList(messageType));
+        Message<?> message = this.doConvert(payload, null, null);
+        try {
+            long now = System.currentTimeMillis();
+            org.apache.rocketmq.common.message.Message rocketMsg = convertToRocketMsg(destination.toString(), message);
+            SendResult sendResult = producer.send(rocketMsg, producer.getSendMsgTimeout());
+            long costTime = System.currentTimeMillis() - now;
+            log.debug("send message cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
+            return sendResult;
+        } catch (Exception e) {
+            log.info("syncSend failed. destination:{}, message:{} ", destination, message);
+            throw new MessagingException(e.getMessage(), e);
+        }
     }
 
     /**

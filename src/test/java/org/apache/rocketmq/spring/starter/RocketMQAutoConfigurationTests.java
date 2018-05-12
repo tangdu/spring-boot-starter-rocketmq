@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.spring.starter;
 
+import cn.luban.commons.message.Topic;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.rocketmq.spring.starter.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.starter.core.DefaultRocketMQListenerContainer;
@@ -158,7 +159,7 @@ public class RocketMQAutoConfigurationTests {
         }
     }
 
-    @RocketMQMessageListener(consumerGroup = TEST_CONSUMER_GROUP, topic = TEST_TOPIC, consumeThreadMax = 1)
+    @RocketMQMessageListener(consumerGroup = TEST_CONSUMER_GROUP, topic = Topic.GOODSCENTER, consumeThreadMax = 1)
     private static class MyListener implements RocketMQListener<String> {
 
         @Override

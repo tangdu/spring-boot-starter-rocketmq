@@ -4,7 +4,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 
-group = 'org.apache.rocketmq'
+group = 'cn.luban'
 version = '1.0.1-RELEASE'
 
 sourceCompatibility = 1.8
