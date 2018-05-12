@@ -19,7 +19,7 @@ buildscript {
         maven { url 'http://maven.aliyun.com/nexus/content/repositories/central' }
     }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.2.RELEASE"
     }
 }
 
@@ -27,8 +27,8 @@ uploadArchives {
     configuration = configurations.archives
     repositories {
         mavenDeployer {
-            repository(url:'http://repo.orzass.com/nexus/content/repositories/releases') {
-                authentication(userName: "xnh", password: "xnh123")
+            repository(url:'http://192.168.1.101:8081/repository/maven-releases/') {
+                authentication(userName: "admin", password: "admin123")
             }
             pom.project {
                 groupId project.group
@@ -43,7 +43,7 @@ uploadArchives {
 repositories {
 
     maven { url 'http://maven.aliyun.com/nexus/content/repositories/central' }
-    maven { url 'http://repo.orzass.com/nexus/content/repositories/releases' }
+    maven { url 'http://192.168.1.101:8081/repository/maven-releases/' }
 }
 
 dependencies {
