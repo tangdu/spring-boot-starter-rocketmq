@@ -94,18 +94,7 @@ public class RocketMQTemplate extends AbstractMessageSendingTemplate<String> imp
         }
 
         Destination destination=Destination.build(topic,Lists.newArrayList(messageType));
-        Message<?> message = this.doConvert(payload, null, null);
-        try {
-            long now = System.currentTimeMillis();
-            org.apache.rocketmq.common.message.Message rocketMsg = convertToRocketMsg(destination.toString(), message);
-            SendResult sendResult = producer.send(rocketMsg, producer.getSendMsgTimeout());
-            long costTime = System.currentTimeMillis() - now;
-            log.debug("send message cost: {} ms, msgId:{}", costTime, sendResult.getMsgId());
-            return sendResult;
-        } catch (Exception e) {
-            log.info("syncSend failed. destination:{}, message:{} ", destination, message);
-            throw new MessagingException(e.getMessage(), e);
-        }
+        return syncSend(destination.toString(), payload);
     }
 
     /**
