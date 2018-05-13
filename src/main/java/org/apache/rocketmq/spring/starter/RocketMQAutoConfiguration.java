@@ -165,9 +165,9 @@ public class RocketMQAutoConfiguration {
             //由于consumerGroup不能重复
             String consumerGroup="";
             if(!StringUtils.hasLength(annotation.consumerGroup())){
-                //1.如果cosumerGroup不设置,TAG包含所有，默认为系统名称+Topic名称
+                //1.如果cosumerGroup不设置,TAG包含所有，默认为系统名称+Topic名称+Message名称
                 consumerGroup= Joiner.on("_").join(LubanConfig.getApplicationName().toUpperCase(),
-                        annotation.topic(),annotation.selectorExpress().getName());
+                        annotation.topic(),annotation.selectorExpress().getName(),annotation.selectorExpress().getName());
             }else{
                 //2.取自定义
                 consumerGroup= environment.resolvePlaceholders(annotation.consumerGroup());
